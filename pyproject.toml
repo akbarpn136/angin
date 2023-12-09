@@ -10,9 +10,14 @@ readme = "README.md"
 python = "^3.12"
 polars = "^0.19.19"
 xlsxwriter = "^3.1.9"
+pandas = "^2.1.4"
+numpy = "^1.26.2"
+scipy = "^1.11.4"
+prettytable = "^3.9.0"
 
 [tool.poetry.scripts]
 dev = "angin.main:run"
+lsce = "angin.main:lsce"
 
 [build-system]
 requires = ["poetry-core"]
