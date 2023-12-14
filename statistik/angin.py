@@ -13,7 +13,8 @@ app = Typer(
     help="Perhitungan nilai maksimum dan rata-rata angin per tahun bulan."
 )
 def maxavg(
-    fname: Annotated[str, typer.Argument(help="Nama file")] = "data.csv",
+    fname: Annotated[str, typer.Argument(
+        help="Lokasi beserta nama file")] = "data.csv",
     simpan: Annotated[str, typer.Option(
         help="Simpan dengan nama file.")] = "final.xlsx",
     tanggal: Annotated[str, typer.Option(
