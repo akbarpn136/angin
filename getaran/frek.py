@@ -19,7 +19,7 @@ def lsce(
     tr: Annotated[float, typer.Option(
         help="Batas waktu maksimum. Contoh --tr 2.2047")],
     fname: Annotated[str, typer.Argument(
-        help="Lokasi beserta nama file")] = "getaran.csv",
+        help="Lokasi beserta nama file")] = "./contoh/getaran.csv",
     t: Annotated[str, typer.Option(
         help="Kolom waktu yang dipilih dalam file fname.")] = "t",
     hh: Annotated[str, typer.Option(
@@ -28,3 +28,23 @@ def lsce(
     frek = FrekHelper(fname=fname)
 
     frek.calc_lsce(t=t, tl=tl, tr=tr, hh=hh)
+
+
+@app.command(
+    help="Menampilkan plot getaran beserta seleksi berdasarkan waktu."
+)
+def plot(
+    tl: Annotated[float, typer.Option(
+        help="Batas waktu minimum. Contoh --tl 0.6159")],
+    tr: Annotated[float, typer.Option(
+        help="Batas waktu maksimum. Contoh --tr 2.2047")],
+    fname: Annotated[str, typer.Argument(
+        help="Lokasi beserta nama file")] = "./contoh/getaran.csv",
+    t: Annotated[str, typer.Option(
+        help="Kolom waktu yang dipilih dalam file fname.")] = "t",
+    hh: Annotated[str, typer.Option(
+        help="Kolom getaran yang dipilih dalam file fname.")] = "h",
+):
+    frek = FrekHelper(fname=fname)
+
+    frek.plot(t=t, tl=tl, tr=tr, hh=hh)
