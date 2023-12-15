@@ -1,2 +1,4 @@
 *.xlsx
 env.yml
+__pycache__
+.vscode
