@@ -1,8 +1,6 @@
-import typer
 from typer import Typer
-from typing_extensions import Annotated
-
-from getaran.helper import FrekHelper
+from getaran.command.hitung_lsce import lsce
+from getaran.command.plot_getaran import plotgtr
 
 
 app = Typer(
@@ -10,41 +8,11 @@ app = Typer(
 )
 
 
-@app.command(
+app.command(
     help="Perhitungan nilai frekuensi, damping factor dan damping ratio."
-)
-def lsce(
-    tl: Annotated[float, typer.Option(
-        help="Batas waktu minimum. Contoh --tl 0.6159")],
-    tr: Annotated[float, typer.Option(
-        help="Batas waktu maksimum. Contoh --tr 2.2047")],
-    fname: Annotated[str, typer.Argument(
-        help="Lokasi beserta nama file")] = "./contoh/getaran.csv",
-    t: Annotated[str, typer.Option(
-        help="Kolom waktu yang dipilih dalam file fname.")] = "t",
-    hh: Annotated[str, typer.Option(
-        help="Kolom getaran yang dipilih dalam file fname.")] = "h",
-):
-    frek = FrekHelper(fname=fname)
-
-    frek.calc_lsce(t=t, tl=tl, tr=tr, hh=hh)
+)(lsce)
 
 
-@app.command(
+app.command(
     help="Menampilkan plot getaran beserta seleksi berdasarkan waktu."
-)
-def plot(
-    tl: Annotated[float, typer.Option(
-        help="Batas waktu minimum. Contoh --tl 0.6159")],
-    tr: Annotated[float, typer.Option(
-        help="Batas waktu maksimum. Contoh --tr 2.2047")],
-    fname: Annotated[str, typer.Argument(
-        help="Lokasi beserta nama file")] = "./contoh/getaran.csv",
-    t: Annotated[str, typer.Option(
-        help="Kolom waktu yang dipilih dalam file fname.")] = "t",
-    hh: Annotated[str, typer.Option(
-        help="Kolom getaran yang dipilih dalam file fname.")] = "h",
-):
-    frek = FrekHelper(fname=fname)
-
-    frek.plot(t=t, tl=tl, tr=tr, hh=hh)
+)(plotgtr)
