@@ -1,5 +1,6 @@
 import numpy as np
 import polars as pl
+import pyvista as pv
 from scipy.linalg import hankel
 from prettytable import PrettyTable
 
@@ -91,3 +92,16 @@ class FrekHelper:
             ])
 
         print(table)
+
+    def plot(self, t, tl, tr, hh):
+        xpenuh = self.df.select(pl.col(t)).to_numpy()
+        ypenuh = self.df.select(pl.col(hh)).to_numpy()
+
+        filter = self.df.filter((pl.col(t) >= tl) & (pl.col(t) <= tr))
+        xseleksi = filter.select(pl.col(t)).to_numpy()
+        yseleksi = filter.select(pl.col(hh)).to_numpy()
+
+        chart = pv.Chart2D(x_label=t, y_label=hh)
+        chart.line(xpenuh, ypenuh, style="-", color="blue", label="penuh")
+        chart.line(xseleksi, yseleksi, style="-", color="red", label="seleksi")
+        chart.show()
