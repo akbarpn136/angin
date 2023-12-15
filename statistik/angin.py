@@ -14,7 +14,7 @@ app = Typer(
 )
 def maxavg(
     fname: Annotated[str, typer.Argument(
-        help="Lokasi beserta nama file")] = "data.csv",
+        help="Lokasi beserta nama file")] = "./contoh/data.csv",
     simpan: Annotated[str, typer.Option(
         help="Simpan dengan nama file.")] = "final.xlsx",
     tanggal: Annotated[str, typer.Option(
