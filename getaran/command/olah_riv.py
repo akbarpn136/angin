@@ -4,6 +4,8 @@ from typer import Option, Argument
 from matplotlib import pyplot as plt
 from typing_extensions import Annotated
 
+from getaran.helper import CollectionHelper
+
 
 def waterfall(
     sudut: Annotated[int, Argument(
@@ -15,32 +17,17 @@ def waterfall(
     zmax: Annotated[float, Option(
         help="Tampilkan nilai plot maksimum sumbu Z.")] = 0.5,
 ):
-    queries = []
-    for file in glob.glob(f"contoh/sukamahi/*_{sudut}_*"):
-        kec = file.replace(".txt", "").split("_")[-1]
-
-        q = pl.scan_csv(
-            file,
-            skip_rows=15,
-            separator="\t",
-            has_header=False,
-            new_columns=["f", "belakang", "depan"]
-        )
-
-        q = q.select(pl.all().str.replace(",", "."))
-        q = q.with_columns(pl.lit(kec).alias("v"))
-        q = q.select(pl.all().cast(pl.Float32))
-        q = q.filter((pl.col("f") >= frekmin) & (pl.col("f") <= frekmaks))
-
-        queries.append(q)
-
-    collections = pl.collect_all(queries)
+    helper = CollectionHelper(
+        f"contoh/sukamahi/*_{sudut}_*",
+        frekmin=frekmin,
+        frekmaks=frekmaks,
+    )
 
     fig = plt.figure(figsize=(8, 3))
     ax1 = fig.add_subplot(121, projection="3d")
     ax2 = fig.add_subplot(122, projection="3d")
 
-    for df in collections:
+    for df in helper.collections:
         frek = df.select(pl.col("f")).to_numpy()
         depan = df.select(pl.col("depan")).to_numpy()
         belakang = df.select(pl.col("belakang")).to_numpy()
@@ -54,7 +41,7 @@ def waterfall(
         zlim=(0, zmax),
         xlabel="Frekuensi (Hz)",
         ylabel="Kecepatan (m/s)",
-        zlabel=r"Akselerometer ($m/s^2$)"
+        zlabel=r"Amplitudo ($m/s^2$)"
     )
 
     ax2.set(
@@ -62,12 +49,64 @@ def waterfall(
         zlim=(0, zmax),
         xlabel="Frekuensi (Hz)",
         ylabel="Kecepatan (m/s)",
-        zlabel=r"Akselerometer ($m/s^2$)"
+        zlabel=r"Amplitudo ($m/s^2$)"
     )
 
     plt.tight_layout()
     plt.show()
 
 
-def displacement():
-    print("Displacement dari data RIV.")
+def displacement(
+    sudut: Annotated[int, Argument(
+        help="Tampilkan data waterfall untuk sudut tertentu.")] = 0,
+    frekmin: Annotated[float, Option(
+        help="Batas minimum frekuensi (Hz).")] = 1,
+    frekmaks: Annotated[float, Option(
+        help="Batas maksimum frekuensi (Hz).")] = 30,
+    skala: Annotated[float, Option(
+        help="Besaran konversi model ke aktual.")] = 1000,
+    bentang: Annotated[float, Option(
+        help="Lebar longitudinal dek.")] = 0.6788,
+    aktual: Annotated[bool, Option(
+        help="Tampilkan data aktual?")] = True,
+):
+    helper = CollectionHelper(
+        f"contoh/sukamahi/*_{sudut}_*",
+        frekmin=frekmin,
+        frekmaks=frekmaks,
+        displacement=True,
+        bentang=bentang,
+        skala=skala,
+    )
+
+    fig = plt.figure(figsize=(8, 10))
+    ax1 = fig.add_subplot(211)
+    ax2 = fig.add_subplot(212)
+
+    for df in helper.collections:
+        if aktual:
+            disp = df.select(pl.col("dispaktualheaving")).to_numpy()
+        else:
+            disp = df.select(pl.col("dispmodelheaving")).to_numpy()
+
+        theta = df.select(pl.col("theta")).to_numpy()
+        v = df.select(pl.col("v")).to_numpy()
+
+        ax1.plot(v[0], disp)
+        ax2.plot(v[0], theta)
+
+    ax1.set(
+        title=f"Displacement Dek (Sudut ${sudut}^\circ$)",
+        xlabel="Kecepatan (m/s)",
+        ylabel="Displacement (m)",
+    )
+
+    ax2.set(
+        title=f"Simpangan Dek (Sudut ${sudut}^\circ$)",
+        xlabel="Kecepatan (m/s)",
+        ylabel=r"$\theta$ ($^\circ$)",
+    )
+
+    plt.tight_layout()
+    plt.grid(True)
+    plt.show()
