@@ -1,4 +1,4 @@
-import glob
+import numpy as np
 import polars as pl
 from typer import Option, Argument
 from matplotlib import pyplot as plt
@@ -64,7 +64,7 @@ def displacement(
     frekmaks: Annotated[float, Option(
         help="Batas maksimum frekuensi (Hz).")] = 30,
     skala: Annotated[float, Option(
-        help="Besaran konversi model ke aktual.")] = 1000,
+        help="Besaran konversi model ke aktual.")] = 10,
     bentang: Annotated[float, Option(
         help="Lebar longitudinal dek.")] = 0.6788,
     aktual: Annotated[bool, Option(
@@ -79,34 +79,49 @@ def displacement(
         skala=skala,
     )
 
-    fig = plt.figure(figsize=(8, 10))
+    fig = plt.figure(figsize=(8, 9))
     ax1 = fig.add_subplot(211)
     ax2 = fig.add_subplot(212)
 
+    x = []
+    y1 = []
+    y2 = []
+
     for df in helper.collections:
         if aktual:
-            disp = df.select(pl.col("dispaktualheaving")).to_numpy()
+            disp = df.select(pl.col("dispaktualheaving").max()).to_numpy()
         else:
-            disp = df.select(pl.col("dispmodelheaving")).to_numpy()
+            disp = df.select(pl.col("dispmodelheaving").max()).to_numpy()
 
-        theta = df.select(pl.col("theta")).to_numpy()
+        theta = df.select(pl.col("theta").max()).to_numpy()
         v = df.select(pl.col("v")).to_numpy()
 
-        ax1.plot(v[0], disp)
-        ax2.plot(v[0], theta)
+        x.append(v[0, 0])
+        y1.append(disp[0, 0])
+        y2.append(theta[0, 0])
 
+    acak = np.array(x)
+    sortedid = np.argsort(acak)
+    deret = np.take_along_axis(acak, sortedid, axis=0)
+    derety1 = np.take_along_axis(np.array(y1), sortedid, axis=0)
+    derety2 = np.take_along_axis(np.array(y2), sortedid, axis=0)
+
+    ax1.plot(deret, derety1, linewidth=1, color="k", marker="x", markersize=4)
+    ax2.plot(deret, derety2, linewidth=1, color="k", marker="x", markersize=4)
+
+    ax1.grid(True)
     ax1.set(
-        title=f"Displacement Dek (Sudut ${sudut}^\circ$)",
+        title=f"Displacement {'Aktual' if aktual else 'Model'} Dek (Sudut ${sudut}^\circ$)",
         xlabel="Kecepatan (m/s)",
-        ylabel="Displacement (m)",
+        ylabel="Displacement (mm)",
     )
 
+    ax2.grid(True)
     ax2.set(
-        title=f"Simpangan Dek (Sudut ${sudut}^\circ$)",
+        title=f"Simpangan {'Aktual' if aktual else 'Model'} Dek (Sudut ${sudut}^\circ$)",
         xlabel="Kecepatan (m/s)",
         ylabel=r"$\theta$ ($^\circ$)",
     )
 
     plt.tight_layout()
-    plt.grid(True)
     plt.show()
