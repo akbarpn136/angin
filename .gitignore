@@ -2,4 +2,6 @@
 env.yml
 __pycache__
 .vscode
-contoh/sukamahi
+contoh/*
+!contoh/data.csv
+!contoh/getaran.csv
