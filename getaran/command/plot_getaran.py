@@ -1,6 +1,6 @@
 import typer
 import polars as pl
-import pyvista as pv
+from matplotlib import pyplot as plt
 from typing_extensions import Annotated
 
 from getaran.helper import FrekHelper
@@ -28,7 +28,11 @@ def plotgtr(
     xseleksi = filter.select(pl.col(t)).to_numpy()
     yseleksi = filter.select(pl.col(hh)).to_numpy()
 
-    chart = pv.Chart2D(x_label=t, y_label=hh)
-    chart.line(xpenuh, ypenuh, style="-", color="blue", label="penuh")
-    chart.line(xseleksi, yseleksi, style="-", color="red", label="seleksi")
-    chart.show()
+    plt.plot(xpenuh, ypenuh, label="penuh", linewidth=1)
+    plt.plot(xseleksi, yseleksi, color="r", label="seleksi", linewidth=1)
+    plt.title("Seleksi getaran")
+    plt.xlabel(t)
+    plt.ylabel(hh)
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
