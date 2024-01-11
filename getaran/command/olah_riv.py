@@ -9,7 +9,7 @@ from getaran.helper import CollectionHelper
 
 def waterfall(
     sudut: Annotated[
-        int, Argument(help="Tampilkan data waterfall untuk sudut tertentu.")
+        int, Option(help="Tampilkan data waterfall untuk sudut tertentu.")
     ] = 0,
     fname: Annotated[str, Option(help="Direktori RIV.")] = "./contoh/sukamahi",
     frekmin: Annotated[float, Option(help="Batas minimum frekuensi (Hz).")] = 1,
