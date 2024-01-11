@@ -8,10 +8,10 @@ from getaran.helper import CollectionHelper
 
 
 def waterfall(
+    fname: Annotated[str, Argument(help="Direktori RIV.")] = "./contoh/sukamahi",
     sudut: Annotated[
         int, Option(help="Tampilkan data waterfall untuk sudut tertentu.")
     ] = 0,
-    fname: Annotated[str, Option(help="Direktori RIV.")] = "./contoh/sukamahi",
     frekmin: Annotated[float, Option(help="Batas minimum frekuensi (Hz).")] = 1,
     frekmaks: Annotated[float, Option(help="Batas maksimum frekuensi (Hz).")] = 30,
     zmax: Annotated[float, Option(help="Tampilkan nilai plot maksimum sumbu Z.")] = 0.5,
@@ -56,8 +56,9 @@ def waterfall(
 
 
 def displacement(
+    fname: Annotated[str, Argument(help="Direktori RIV.")] = "./contoh/sukamahi",
     sudut: Annotated[
-        int, Argument(help="Tampilkan data waterfall untuk sudut tertentu.")
+        int, Option(help="Tampilkan data waterfall untuk sudut tertentu.")
     ] = 0,
     frekmin: Annotated[float, Option(help="Batas minimum frekuensi (Hz).")] = 1,
     frekmaks: Annotated[float, Option(help="Batas maksimum frekuensi (Hz).")] = 30,
@@ -66,7 +67,7 @@ def displacement(
     aktual: Annotated[bool, Option(help="Tampilkan data aktual?")] = True,
 ):
     helper = CollectionHelper(
-        f"contoh/sukamahi/*_{sudut}_*",
+        f"{fname}/*_{sudut}_*",
         frekmin=frekmin,
         frekmaks=frekmaks,
         displacement=True,
