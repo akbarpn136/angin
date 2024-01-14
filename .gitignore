@@ -5,4 +5,5 @@ __pycache__
 contoh/*
 !contoh/data.csv
 !contoh/getaran.csv
+!contoh/zimmerman.csv
 tmp.py
