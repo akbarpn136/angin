@@ -42,15 +42,14 @@ def fmz(
         ((pl.col("F1") + pl.col("F2") + pl.col("F3")) / fs).alias("F")
     )
 
-    df = df.select(pl.col("sudut", "v", "q", "F"))
-    vv = df.select(pl.col("v")).to_numpy().flatten()
+    df = df.select(pl.col("q", "F"))
     qq = df.select(pl.col("q")).to_numpy().flatten()
     ff = df.select(pl.col("F")).to_numpy().flatten()
 
     # Curve Fit
     coef = poly.polyfit(qq, ff, 2)
     pp = poly.Polynomial(coef)
-    tt = np.linspace(0, vv.max(), 100)
+    tt = np.linspace(0, qq.max(), 100)
 
     # Calculate critical velocity
     qcrit = poly.polyroots(coef)
@@ -60,10 +59,10 @@ def fmz(
     plt.figure(figsize=(10, 6))
     plt.annotate(r"$V_{crit} =" + f"{vcrit[0]}$ m/s",
                  xy=(10, 10), xycoords="figure points")
-    plt.scatter(vv, ff, marker="x", color="black", label="raw")
+    plt.scatter(qq, ff, marker="x", color="black", label="raw")
     plt.plot(tt, pp(tt), color="green", linewidth=1, label="fit")
     plt.title(f"Flutter Margin $(\\alpha = {sudut}^\circ)$")
-    plt.xlabel(r"V $(m/s)$")
+    plt.xlabel(r"q $(Pa)$")
     plt.ylabel("F")
     plt.grid(True)
     plt.legend()
