@@ -22,7 +22,7 @@ def lsce(
 ):
     c = 1/30
     Moda = 32 * 2
-    hlp = FrekHelper(fname=fname)
+    hlp = FrekHelper(fname=fname, sep="\t")
     df = hlp.df
     x = df.filter((pl.col(t) >= tl) & (pl.col(t) <= tr))
     x = x.with_columns(
