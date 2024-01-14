@@ -4,9 +4,18 @@ import polars as pl
 
 
 class FrekHelper:
-    def __init__(self, fname):
+    def __init__(self, fname, skip_rows=19, sep=","):
         self.fname = fname
-        self.df = pl.read_csv(self.fname)
+        self.df = pl.read_csv(
+            self.fname,
+            separator=sep,
+            has_header=False,
+            skip_rows=skip_rows,
+            truncate_ragged_lines=True
+        )
+        self.df.columns = ["t", "depan", "belakang"]
+        self.df = self.df.select(
+            pl.all().str.replace(",", ".").cast(pl.Float32))
 
 
 class CollectionHelper:
