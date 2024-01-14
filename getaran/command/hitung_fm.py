@@ -12,6 +12,9 @@ def fmz(
     sudut: Annotated[
         int, Option(help="Tampilkan data waterfall untuk sudut tertentu.")
     ] = 0,
+    show_index: Annotated[
+        bool, Option(help="Tampilkan data plot index saja?.")
+    ] = False,
 ):
     rho = 1.2
     df = pl.read_csv(fname)
@@ -47,23 +50,36 @@ def fmz(
     ff = df.select(pl.col("F")).to_numpy().flatten()
 
     # Curve Fit
+    np.seterr("warn")
     coef = poly.polyfit(qq, ff, 2)
     pp = poly.Polynomial(coef)
     tt = np.linspace(0, qq.max(), 100)
 
     # Calculate critical velocity
     qcrit = poly.polyroots(coef)
-    vcrit = np.sqrt(2 * qcrit / rho)
+
+    try:
+        vcrit = np.round(np.sqrt(2 * qcrit[1] / rho), 2)
+    except Warning as e:
+        print(f"WARNING: {e}")
+        vcrit = "N/A"
+    except Exception as e:
+        print(f"EXCEPTION: {e}")
+        vcrit = "N/A"
 
     # Plotting
     plt.figure(figsize=(10, 6))
-    plt.annotate(r"$V_{crit} =" + f"{vcrit[0]}$ m/s",
+    plt.annotate(r"$V_{crit} =" + f"{vcrit}$ m/s",
                  xy=(10, 10), xycoords="figure points")
+    if show_index:
+        for idx, _ in enumerate(qq):
+            plt.annotate(idx + 1, xy=(qq[idx], ff[idx]))
+
     plt.scatter(qq, ff, marker="x", color="black", label="raw")
     plt.plot(tt, pp(tt), color="green", linewidth=1, label="fit")
     plt.title(f"Flutter Margin $(\\alpha = {sudut}^\circ)$")
     plt.xlabel(r"q $(Pa)$")
-    plt.ylabel("F")
+    plt.ylabel(r"$F_z$")
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
