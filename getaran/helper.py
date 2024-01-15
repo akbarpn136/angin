@@ -11,11 +11,10 @@ class FrekHelper:
             separator=sep,
             has_header=False,
             skip_rows=skip_rows,
-            truncate_ragged_lines=True
+            truncate_ragged_lines=True,
         )
         self.df.columns = ["t", "depan", "belakang"]
-        self.df = self.df.select(
-            pl.all().str.replace(",", ".").cast(pl.Float32))
+        self.df = self.df.select(pl.all().str.replace(",", ".").cast(pl.Float32))
 
 
 class CollectionHelper:
@@ -34,7 +33,7 @@ class CollectionHelper:
                 skip_rows=15,
                 separator="\t",
                 has_header=False,
-                new_columns=["f", "belakang", "depan"]
+                new_columns=["f", "depan", "belakang"],
             )
 
             q = q.select(pl.all().str.replace(",", "."))
@@ -45,24 +44,28 @@ class CollectionHelper:
             if self.displacement:
                 q = q.with_columns(
                     ((pl.col("depan") + pl.col("belakang")) / 2).alias("heaving"),
-                    ((pl.col("depan") - pl.col("belakang")) / 2).abs().alias("torsion")
+                    ((pl.col("depan") - pl.col("belakang")) / 2).abs().alias("torsion"),
                 )
 
                 q = q.with_columns(
-                    (1000 * pl.col("heaving") /
-                     (4 * (np.pi ** 2) * pl.col("f") ** 2)).alias("dispmodelheaving"),
-                    (pl.col("torsion") / (4 * (np.pi ** 2) *
-                     pl.col("f") ** 2)).alias("dispmodeltorsion")
+                    (
+                        1000 * pl.col("heaving") / (4 * (np.pi**2) * pl.col("f") ** 2)
+                    ).alias("dispmodelheaving"),
+                    (pl.col("torsion") / (4 * (np.pi**2) * pl.col("f") ** 2)).alias(
+                        "dispmodeltorsion"
+                    ),
                 )
 
                 q = q.with_columns(
-                    (np.rad2deg(
-                        np.arcsin(2 * pl.col("dispmodeltorsion") / self.bentang))).alias("theta")
+                    (
+                        np.rad2deg(
+                            np.arcsin(2 * pl.col("dispmodeltorsion") / self.bentang)
+                        )
+                    ).alias("theta")
                 )
 
                 q = q.with_columns(
-                    (self.skala * pl.col("dispmodelheaving")
-                     ).alias("dispaktualheaving")
+                    (self.skala * pl.col("dispmodelheaving")).alias("dispaktualheaving")
                 )
 
             queries.append(q)
