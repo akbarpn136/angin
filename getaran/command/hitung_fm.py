@@ -7,8 +7,9 @@ from numpy.polynomial import polynomial as poly
 
 
 def fmz(
-    fname: Annotated[str, Argument(
-        help="File flutter margin.")] = "./contoh/sukamahi.csv",
+    fname: Annotated[
+        str, Argument(help="File flutter margin.")
+    ] = "./contoh/sukamahi.csv",
     sudut: Annotated[
         int, Option(help="Tampilkan data waterfall untuk sudut tertentu.")
     ] = 0,
@@ -34,16 +35,17 @@ def fmz(
     bet2 = pl.col("dampf2")
 
     df = df.with_columns(
-        (((o2 ** 2 - o1 ** 2) / 2 + (bet2 ** 2 - bet1 ** 2) / 2) ** 2).alias("F1"),
-        (4 * bet1 * bet2 * ((o2 ** 2 + o1 ** 2) / 2 +
-         2 * ((bet2 + bet1) / 2) ** 2)).alias("F2"),
-        (((bet2 - bet1) / (bet2 + bet1)) *
-         ((o2 ** 2 - o1 ** 2) / 2 + 2 * (((bet2 + bet1) / 2) ** 2) ** 2)).alias("F3")
+        (((o2**2 - o1**2) / 2 + (bet2**2 - bet1**2) / 2) ** 2).alias("F1"),
+        (
+            4 * bet1 * bet2 * ((o2**2 + o1**2) / 2 + 2 * ((bet2 + bet1) / 2) ** 2)
+        ).alias("F2"),
+        (
+            ((bet2 - bet1) / (bet2 + bet1))
+            * ((o2**2 - o1**2) / 2 + 2 * (((bet2 + bet1) / 2) ** 2) ** 2)
+        ).alias("F3"),
     )
 
-    df = df.with_columns(
-        ((pl.col("F1") + pl.col("F2") + pl.col("F3")) / fs).alias("F")
-    )
+    df = df.with_columns(((pl.col("F1") + pl.col("F2") + pl.col("F3")) / fs).alias("F"))
 
     df = df.select(pl.col("q", "F"))
     qq = df.select(pl.col("q")).to_numpy().flatten()
@@ -51,15 +53,15 @@ def fmz(
 
     # Curve Fit
     np.seterr("warn")
-    coef = poly.polyfit(qq, ff, 2)
+    coef = poly.polyfit(qq, ff, 1)
     pp = poly.Polynomial(coef)
-    tt = np.linspace(0, qq.max(), 100)
+    tt = np.linspace(0, qq.max(), qq.size)
 
     # Calculate critical velocity
     qcrit = poly.polyroots(coef)
 
     try:
-        vcrit = np.round(np.sqrt(2 * qcrit[1] / rho), 2)
+        vcrit = np.round(np.sqrt(2 * qcrit[0] / rho), 2)
     except Warning as e:
         print(f"WARNING: {e}")
         vcrit = "N/A"
@@ -67,19 +69,30 @@ def fmz(
         print(f"EXCEPTION: {e}")
         vcrit = "N/A"
 
+    # Hitung R Squared
+    yhat = pp(tt)
+    ybar = ff.mean()
+    ssreg = np.sum((yhat - ybar) ** 2)
+    sstot = np.sum((ff - ybar) ** 2)
+    rsquared = np.round(ssreg / sstot, 2)
+
     # Plotting
     plt.figure(figsize=(10, 6))
-    plt.annotate(r"$V_{crit} =" + f"{vcrit}$ m/s",
-                 xy=(10, 10), xycoords="figure points")
+    plt.annotate(
+        r"$V_{crit} =" + f"{vcrit}$ m/s, $R^2 = {rsquared}$",
+        xy=(40, 10),
+        xycoords="figure points",
+    )
     if show_index:
         for idx, _ in enumerate(qq):
             plt.annotate(idx + 1, xy=(qq[idx], ff[idx]))
 
     plt.scatter(qq, ff, marker="x", color="black", label="raw")
-    plt.plot(tt, pp(tt), color="green", linewidth=1, label="fit")
+    plt.plot(tt, yhat, color="green", linewidth=1, label="fit")
     plt.title(f"Flutter Margin $(\\alpha = {sudut}^\circ)$")
     plt.xlabel(r"q $(Pa)$")
     plt.ylabel(r"$F_z$")
+    plt.ylim(0, 1.1)
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
