@@ -77,11 +77,13 @@ def fmz(
     ssreg = np.sum((yhat - ybar) ** 2)
     sstot = np.sum((ff - ybar) ** 2)
     rsquared = np.round(ssreg / sstot, 2)
+    print(f"RSquared = {rsquared}")
 
     # Plotting
     plt.figure(figsize=(10, 6))
     plt.annotate(
-        r"$V_{crit} =" + f"{vcrit}$ m/s, $R^2 = {rsquared}$",
+        r"$V_{crit} =" + f"{vcrit}$ m/s, " +
+        r"$q_{crit} =" + f"{np.round(qcrit[0], 2)}$ Pa",
         xy=(40, 10),
         xycoords="figure points",
     )
