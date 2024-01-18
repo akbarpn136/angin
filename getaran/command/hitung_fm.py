@@ -37,7 +37,8 @@ def fmz(
     df = df.with_columns(
         (((o2**2 - o1**2) / 2 + (bet2**2 - bet1**2) / 2) ** 2).alias("F1"),
         (
-            4 * bet1 * bet2 * ((o2**2 + o1**2) / 2 + 2 * ((bet2 + bet1) / 2) ** 2)
+            4 * bet1 * bet2 * ((o2**2 + o1**2) / 2 + 2 *
+                               ((bet2 + bet1) / 2) ** 2)
         ).alias("F2"),
         (
             ((bet2 - bet1) / (bet2 + bet1))
@@ -45,7 +46,8 @@ def fmz(
         ).alias("F3"),
     )
 
-    df = df.with_columns(((pl.col("F1") + pl.col("F2") + pl.col("F3")) / fs).alias("F"))
+    df = df.with_columns(
+        ((pl.col("F1") + pl.col("F2") + pl.col("F3")) / fs).alias("F"))
 
     df = df.select(pl.col("q", "F"))
     qq = df.select(pl.col("q")).to_numpy().flatten()
