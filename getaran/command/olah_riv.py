@@ -8,13 +8,17 @@ from getaran.helper import CollectionHelper
 
 
 def waterfall(
-    fname: Annotated[str, Argument(help="Direktori RIV.")] = "./contoh/sukamahi",
+    fname: Annotated[str, Argument(
+        help="Direktori RIV.")] = "./contoh/sukamahi",
     sudut: Annotated[
         int, Option(help="Tampilkan data waterfall untuk sudut tertentu.")
     ] = 0,
-    frekmin: Annotated[float, Option(help="Batas minimum frekuensi (Hz).")] = 1,
-    frekmaks: Annotated[float, Option(help="Batas maksimum frekuensi (Hz).")] = 30,
-    zmax: Annotated[float, Option(help="Tampilkan nilai plot maksimum sumbu Z.")] = 0.5,
+    frekmin: Annotated[float, Option(
+        help="Batas minimum frekuensi (Hz).")] = 1,
+    frekmaks: Annotated[float, Option(
+        help="Batas maksimum frekuensi (Hz).")] = 30,
+    zmax: Annotated[float, Option(
+        help="Tampilkan nilai plot maksimum sumbu Z.")] = 0.5,
 ):
     helper = CollectionHelper(
         f"{fname}/*_{sudut}_*",
@@ -56,13 +60,17 @@ def waterfall(
 
 
 def displacement(
-    fname: Annotated[str, Argument(help="Direktori RIV.")] = "./contoh/sukamahi",
+    fname: Annotated[str, Argument(
+        help="Direktori RIV.")] = "./contoh/sukamahi",
     sudut: Annotated[
         int, Option(help="Tampilkan data waterfall untuk sudut tertentu.")
     ] = 0,
-    frekmin: Annotated[float, Option(help="Batas minimum frekuensi (Hz).")] = 1,
-    frekmaks: Annotated[float, Option(help="Batas maksimum frekuensi (Hz).")] = 30,
-    skala: Annotated[float, Option(help="Besaran konversi model ke aktual.")] = 10,
+    frekmin: Annotated[float, Option(
+        help="Batas minimum frekuensi (Hz).")] = 1,
+    frekmaks: Annotated[float, Option(
+        help="Batas maksimum frekuensi (Hz).")] = 30,
+    skala: Annotated[float, Option(
+        help="Besaran konversi model ke aktual.")] = 10,
     bentang: Annotated[float, Option(help="Lebar longitudinal dek.")] = 0.6788,
     aktual: Annotated[bool, Option(help="Tampilkan data aktual?")] = True,
 ):
@@ -121,3 +129,11 @@ def displacement(
 
     plt.tight_layout()
     plt.show()
+
+    df = pl.DataFrame({
+        "v": np.round(deret, 2),
+        "displacement": derety1,
+        "theta": derety2
+    })
+
+    df.write_csv(f"./contoh/displacement{sudut}.csv")
