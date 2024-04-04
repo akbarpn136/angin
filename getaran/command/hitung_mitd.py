@@ -2,6 +2,7 @@ import math
 import typer
 import numpy as np
 import polars as pl
+from scipy.linalg import lstsq, eig
 from typing_extensions import Annotated
 
 from getaran.helper import FrekHelper
@@ -45,8 +46,15 @@ def _itd(df, idxl, idxh, idxt):
 
     # positif cycle
     # A_n = np.dot(phi2, phi2.T) / np.dot(phi1, phi2.T)
+    A_n = lstsq(np.dot(phi2, phi2.T).T, np.dot(phi1, phi2.T).T)[0].T
+    A_p = lstsq(np.dot(phi2, phi1.T).T, np.dot(phi1, phi1.T).T)[0].T
+    A_a = (A_n + A_p) / 2
 
-    print(phi1)
+    eigval, eigvec = eig(A_a)
+
+    print(eigval)
+    print()
+    print(eigvec)
 
 
 def mitd(
@@ -66,7 +74,7 @@ def mitd(
         str, typer.Option(help="Kolom getaran yang dipilih dalam file fname.")
     ] = "h",
 ):
-    hlp = FrekHelper(fname=fname, sep="\t")
+    hlp = FrekHelper(fname=fname, sep="\t", skip_rows=15)
     df = hlp.df
     df = df.with_columns(
         ((pl.col("depan") + pl.col("belakang")) / 2).alias("heaving"),
