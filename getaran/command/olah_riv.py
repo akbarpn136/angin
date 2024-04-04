@@ -8,8 +8,11 @@ from getaran.helper import CollectionHelper
 
 
 def waterfall(
-    sudut: Annotated[int, Argument(
-        help="Tampilkan data waterfall untuk sudut tertentu.")] = 0,
+    fname: Annotated[str, Argument(
+        help="Direktori RIV.")] = "./contoh/sukamahi",
+    sudut: Annotated[
+        int, Option(help="Tampilkan data waterfall untuk sudut tertentu.")
+    ] = 0,
     frekmin: Annotated[float, Option(
         help="Batas minimum frekuensi (Hz).")] = 1,
     frekmaks: Annotated[float, Option(
@@ -18,7 +21,7 @@ def waterfall(
         help="Tampilkan nilai plot maksimum sumbu Z.")] = 0.5,
 ):
     helper = CollectionHelper(
-        f"contoh/sukamahi/*_{sudut}_*",
+        f"{fname}/*_{sudut}_*",
         frekmin=frekmin,
         frekmaks=frekmaks,
     )
@@ -41,7 +44,7 @@ def waterfall(
         zlim=(0, zmax),
         xlabel="Frekuensi (Hz)",
         ylabel="Kecepatan (m/s)",
-        zlabel=r"Amplitudo ($m/s^2$)"
+        zlabel=r"Amplitudo ($m/s^2$)",
     )
 
     ax2.set(
@@ -49,7 +52,7 @@ def waterfall(
         zlim=(0, zmax),
         xlabel="Frekuensi (Hz)",
         ylabel="Kecepatan (m/s)",
-        zlabel=r"Amplitudo ($m/s^2$)"
+        zlabel=r"Amplitudo ($m/s^2$)",
     )
 
     plt.tight_layout()
@@ -57,21 +60,22 @@ def waterfall(
 
 
 def displacement(
-    sudut: Annotated[int, Argument(
-        help="Tampilkan data waterfall untuk sudut tertentu.")] = 0,
+    fname: Annotated[str, Argument(
+        help="Direktori RIV.")] = "./contoh/sukamahi",
+    sudut: Annotated[
+        int, Option(help="Tampilkan data waterfall untuk sudut tertentu.")
+    ] = 0,
     frekmin: Annotated[float, Option(
         help="Batas minimum frekuensi (Hz).")] = 1,
     frekmaks: Annotated[float, Option(
         help="Batas maksimum frekuensi (Hz).")] = 30,
     skala: Annotated[float, Option(
         help="Besaran konversi model ke aktual.")] = 10,
-    bentang: Annotated[float, Option(
-        help="Lebar longitudinal dek.")] = 0.6788,
-    aktual: Annotated[bool, Option(
-        help="Tampilkan data aktual?")] = True,
+    bentang: Annotated[float, Option(help="Lebar longitudinal dek.")] = 0.6788,
+    aktual: Annotated[bool, Option(help="Tampilkan data aktual?")] = True,
 ):
     helper = CollectionHelper(
-        f"contoh/sukamahi/*_{sudut}_*",
+        f"{fname}/*_{sudut}_*",
         frekmin=frekmin,
         frekmaks=frekmaks,
         displacement=True,
@@ -125,3 +129,11 @@ def displacement(
 
     plt.tight_layout()
     plt.show()
+
+    df = pl.DataFrame({
+        "v": np.round(deret, 2),
+        "displacement": derety1,
+        "theta": derety2
+    })
+
+    df.write_csv(f"./contoh/displacement{sudut}.csv")

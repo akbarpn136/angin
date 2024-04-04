@@ -18,7 +18,7 @@ def plotgtr(
     hh: Annotated[str, typer.Option(
         help="Kolom getaran yang dipilih dalam file fname.")] = "h",
 ):
-    hlp = FrekHelper(fname=fname)
+    hlp = FrekHelper(fname=fname, sep="\t")
     df = hlp.df
 
     xpenuh = df.select(pl.col(t)).to_numpy()
