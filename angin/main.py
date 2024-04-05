@@ -6,7 +6,7 @@ from getaran import frek
 
 app = Typer(
     help="Jembatan CLI digunakan untuk keperluan pengujian jembatan dalam terowongan angin.",
-    pretty_exceptions_show_locals=False
+    pretty_exceptions_show_locals=False,
 )
 
 app.add_typer(
@@ -20,3 +20,6 @@ app.add_typer(
     name="frek",
     short_help="Sub aplikasi untuk perhitungan frekuensi dan damping.",
 )
+
+if __name__ == "__main__":
+    app()
