@@ -4,7 +4,7 @@ import numpy as np
 import polars as pl
 from matplotlib import pyplot as plt
 from typing_extensions import Annotated
-from scipy.linalg import lstsq, eig, inv
+from scipy.linalg import lstsq, eig, pinv
 
 from getaran.helper import FrekHelper
 
@@ -12,12 +12,6 @@ from getaran.helper import FrekHelper
 def _itd(df, fd, idxl, idxh, idxt):
     # delta time
     dt = df.select(pl.col("t").diff().take(1)).item()
-
-    # frequency sampling used
-    fs = 1 / dt
-
-    # number of data
-    N = df.select(pl.col("t").count()).item()
 
     t = df.select(pl.col("t").slice(idxt, idxl + 1)).to_numpy().flatten()
     yh = df.select(pl.col("heaving").slice(idxh, idxl + 1)).to_numpy().flatten()
@@ -42,14 +36,18 @@ def _itd(df, fd, idxl, idxh, idxt):
     set3_t_N1N2 = yt[N1 + N2 : -1]
 
     # system matrices
-    phi1 = np.vstack((set1_h, set1_t, set2_h_N2, set2_t_N2))
-    phi2 = np.vstack((set2_h_N1, set2_t_N1, set3_h_N1N2, set3_t_N1N2))
+    phi1 = np.vstack((set1_h, set1_t, set2_h_N2, set2_t_N2)).conj()
+    phi2 = np.vstack((set2_h_N1, set2_t_N1, set3_h_N1N2, set3_t_N1N2)).conj()
 
     # positive cycle
-    A_n = lstsq(np.dot(phi2, phi2.T).T, np.dot(phi1, phi2.T).T)[0].T
+    A_n1 = np.dot(phi2, phi2.T)
+    A_n2 = np.dot(phi1, phi2.T)
+    A_n = np.dot(A_n1, pinv(A_n2))
 
     # negative cycle
-    A_p = lstsq(np.dot(phi2, phi1.T).T, np.dot(phi1, phi1.T).T)[0].T
+    A_p1 = np.dot(phi2, phi1.T)
+    A_p2 = np.dot(phi1, phi1.T)
+    A_p = np.dot(A_p1, pinv(A_p2))
 
     # average of positive and negative cycle
     A_a = (A_n + A_p) / 2
@@ -85,7 +83,8 @@ def _itd(df, fd, idxl, idxh, idxt):
     vt0 = (yt[1] - yt[0]) / dt
 
     ic = np.array([yh[0], yt[0], vh0, vt0]).reshape((-1, 1))
-    C = np.dot(inv(D), ic)
+    # C = np.dot(inv(D), ic)
+    C = lstsq(D, ic)[0]
 
     a = C[0, 0]
     b = C[1, 0]
@@ -108,7 +107,7 @@ def _itd(df, fd, idxl, idxh, idxt):
         ]
     )
 
-    P = np.real(P) + (1 * np.imag(P) * 1j)
+    # P = np.real(P) + (1 * np.imag(P) * 1j)
     e = np.array(
         [
             np.exp(lmd1 * t),
@@ -155,7 +154,7 @@ def mitd(
     plt.figure(figsize=(9, 5))
     plt.subplot(121)
     plt.plot(t, yh, label="pengujian")
-    plt.scatter(t, x[:, 0], marker="x", color="black", label="ITD")
+    plt.scatter(t, np.real(x[:, 0]), marker="x", color="black", label="ITD")
     plt.xlabel("time (s)")
     plt.ylabel("h [m]")
     plt.legend()
@@ -163,7 +162,7 @@ def mitd(
 
     plt.subplot(122)
     plt.plot(t, yt, label="pengujian")
-    plt.scatter(t, x[:, 1], marker="x", color="black", label="ITD")
+    plt.scatter(t, np.real(x[:, 1]), marker="x", color="black", label="ITD")
     plt.xlabel("time (s)")
     plt.ylabel("$\\alpha$ (rad)")
     plt.legend()
