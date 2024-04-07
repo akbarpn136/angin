@@ -5,6 +5,7 @@ import polars as pl
 from matplotlib import pyplot as plt
 from typing_extensions import Annotated
 from scipy.linalg import lstsq, eig, pinv
+from scipy.signal import savgol_filter
 
 from getaran.helper import FrekHelper
 
@@ -15,7 +16,10 @@ def _itd(df, fd, idxl, idxh, idxt):
 
     t = df.select(pl.col("t").slice(idxt, idxl + 1)).to_numpy().flatten()
     yh = df.select(pl.col("heaving").slice(idxh, idxl + 1)).to_numpy().flatten()
+    yh = savgol_filter(yh, 20, 3)
+
     yt = df.select(pl.col("torsion").slice(idxt, idxl + 1)).to_numpy().flatten()
+    yt = savgol_filter(yt, 5, 3)
 
     # first time shift coefficient
     N1 = math.ceil(1 / (4 * dt * fd))
