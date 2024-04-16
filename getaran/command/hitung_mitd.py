@@ -145,12 +145,22 @@ def mitd(
             help="Pilih nilai paling maksimum antara frekuensi heaving or torsion, satuan dalam Hz"
         ),
     ] = 10,
+    chord: Annotated[
+        float,
+        typer.Option(help="Panjang seksional jembatan"),
+    ] = 100,
 ):
     hlp = FrekHelper(fname=fname, sep="\t", skip_rows=15)
     df = hlp.df
+
+    varb = (pl.col("depan") - pl.col("belakang")).abs() / chord
     df = df.with_columns(
         ((pl.col("depan") + pl.col("belakang")) / 2).alias("heaving"),
-        ((pl.col("depan") - pl.col("belakang")) / 2).alias("torsion"),
+        (
+            pl.when(pl.col("depan") > pl.col("belakang"))
+            .then(-np.arcsin(varb))
+            .otherwise(np.arcsin(varb))
+        ).alias("torsion"),
     )
 
     t, yh, yt, x = _itd(df=df, fd=fd, idxl=idxl, idxh=idxh, idxt=idxt)
@@ -160,7 +170,7 @@ def mitd(
     plt.plot(t, yh, label="pengujian", color="gainsboro")
     plt.scatter(t, np.real(x[:, 0]), marker=".", s=12, color="black", label="ITD")
     plt.xlabel("time (s)")
-    plt.ylabel("h [m]")
+    plt.ylabel("h [mm]")
     plt.legend()
     plt.title("Heaving")
 
@@ -168,7 +178,7 @@ def mitd(
     plt.plot(t, yt, label="pengujian", color="gainsboro")
     plt.scatter(t, np.real(x[:, 1]), marker=".", s=12, color="black", label="ITD")
     plt.xlabel("time (s)")
-    plt.ylabel("$\\alpha$ (rad)")
+    plt.ylabel("$\\alpha$ [rad]")
     plt.legend()
     plt.title("Torsion")
 
