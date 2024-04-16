@@ -88,7 +88,6 @@ def _itd(df, fd, idxl, idxh, idxt):
     vt0 = (yt[1] - yt[0]) / dt
 
     ic = np.array([yh[0], yt[0], vh0, vt0]).reshape((-1, 1))
-    # C = np.dot(inv(D), ic)
     C = lstsq(D, ic)[0]
 
     a = C[0, 0]
@@ -151,23 +150,23 @@ def mitd(
     df = hlp.df
     df = df.with_columns(
         ((pl.col("depan") + pl.col("belakang")) / 2).alias("heaving"),
-        ((pl.col("depan") - pl.col("belakang")) / 2).abs().alias("torsion"),
+        ((pl.col("depan") - pl.col("belakang")) / 2).alias("torsion"),
     )
 
     t, yh, yt, x = _itd(df=df, fd=fd, idxl=idxl, idxh=idxh, idxt=idxt)
 
     plt.figure(figsize=(9, 5))
     plt.subplot(121)
-    plt.plot(t, yh, label="pengujian")
-    plt.scatter(t, np.real(x[:, 0]), marker="x", color="black", label="ITD")
+    plt.plot(t, yh, label="pengujian", color="gainsboro")
+    plt.scatter(t, np.real(x[:, 0]), marker=".", s=12, color="black", label="ITD")
     plt.xlabel("time (s)")
     plt.ylabel("h [m]")
     plt.legend()
     plt.title("Heaving")
 
     plt.subplot(122)
-    plt.plot(t, yt, label="pengujian")
-    plt.scatter(t, np.real(x[:, 1]), marker="x", color="black", label="ITD")
+    plt.plot(t, yt, label="pengujian", color="gainsboro")
+    plt.scatter(t, np.real(x[:, 1]), marker=".", s=12, color="black", label="ITD")
     plt.xlabel("time (s)")
     plt.ylabel("$\\alpha$ (rad)")
     plt.legend()
