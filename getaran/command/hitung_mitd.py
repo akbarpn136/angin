@@ -123,6 +123,143 @@ def _itd(df, fd, idxl, idxh, idxt):
 
     x = np.dot(P, e).T
 
+    # Apply MITD
+    j = 1
+
+    while j > 0.1e-5:
+        xn = x
+        lmd1n = lmd1
+        lmd2n = lmd2
+        lmd3n = lmd3
+        lmd4n = lmd4
+        Pn = P
+        icn = ic
+
+        Xh = xn[:, 0]
+        set1_hb1 = Xh[: Xh.size - N1 - N2 - 1]
+        set2_h_N2b1 = Xh[N2 : Xh.size - N1 - 1]
+        set2_h_N1b1 = Xh[N1 : Xh.size - N2 - 1]
+        set3_h_N1N2b1 = Xh[N1 + N2 : Xh.size - 1]
+
+        Xt = xn[:, 1]
+        set1_tb1 = Xt[: Xt.size - N1 - N2 - 1]
+        set2_t_N2b1 = Xt[N2 : Xt.size - N1 - 1]
+        set2_t_N1b1 = Xt[N1 : Xt.size - N2 - 1]
+        set3_t_N1N2b1 = Xt[N1 + N2 : Xt.size - 1]
+
+        phi1b1 = np.vstack((set1_hb1, set1_tb1, set2_h_N2b1, set2_t_N2b1)).conj()
+        phi2b1 = np.vstack(
+            (
+                set2_h_N1b1,
+                set2_t_N1b1,
+                set3_h_N1N2b1,
+                set3_t_N1N2b1,
+            )
+        ).conj()
+
+        # positive cycle
+        A_nbb1 = np.dot(phi2, phi2b1.T)
+        A_nbb2 = np.dot(phi1, phi2b1.T)
+        A_nb1 = np.dot(A_nbb1, pinv(A_nbb2))
+
+        # negative cycle
+        A_pbb1 = np.dot(phi2, phi1b1.T)
+        A_pbb2 = np.dot(phi1, phi1b1.T)
+        A_pb1 = np.dot(A_pbb1, pinv(A_pbb2))
+
+        # average of positive and negative cycle
+        A_ab1 = (A_pb1 + A_nb1) / 2
+
+        eigval_pb1, eigvec_pb1 = eig(A_ab1)
+
+        lmd1 = np.log(eigval_pb1[0]) / (N1 * dt)
+        lmd2 = np.log(eigval_pb1[1]) / (N1 * dt)
+        lmd3 = np.log(eigval_pb1[2]) / (N1 * dt)
+        lmd4 = np.log(eigval_pb1[3]) / (N1 * dt)
+
+        jj = np.array(
+            [
+                [
+                    np.abs(np.abs(np.real(lmd1)) - np.abs(np.real(lmd1n))),
+                    np.abs(np.abs(np.imag(lmd2)) - np.abs(np.imag(lmd2n))),
+                    np.abs(np.abs(np.real(lmd3)) - np.abs(np.real(lmd3n))),
+                    np.abs(np.abs(np.imag(lmd4)) - np.abs(np.imag(lmd4n))),
+                ],
+                [
+                    np.abs(np.abs(np.real(lmd1)) - np.abs(np.real(lmd1n))),
+                    np.abs(np.abs(np.imag(lmd2)) - np.abs(np.imag(lmd2n))),
+                    np.abs(np.abs(np.real(lmd3)) - np.abs(np.real(lmd3n))),
+                    np.abs(np.abs(np.imag(lmd4)) - np.abs(np.imag(lmd4n))),
+                ],
+            ]
+        )
+
+        D = np.array(
+            [
+                [
+                    eigvec_pb1[0, 0],
+                    eigvec_pb1[0, 1],
+                    eigvec_pb1[0, 2],
+                    eigvec_pb1[0, 3],
+                ],
+                [
+                    eigvec_pb1[1, 0],
+                    eigvec_pb1[1, 1],
+                    eigvec_pb1[1, 2],
+                    eigvec_pb1[1, 3],
+                ],
+                [
+                    lmd1 * eigvec_pb1[0, 0],
+                    lmd2 * eigvec_pb1[0, 1],
+                    lmd3 * eigvec_pb1[0, 2],
+                    lmd4 * eigvec_pb1[0, 3],
+                ],
+                [
+                    lmd1 * eigvec_pb1[1, 0],
+                    lmd2 * eigvec_pb1[1, 1],
+                    lmd3 * eigvec_pb1[1, 2],
+                    lmd4 * eigvec_pb1[1, 3],
+                ],
+            ]
+        )
+
+        C = lstsq(D, icn)[0]
+
+        a = C[0, 0]
+        b = C[1, 0]
+        c = C[2, 0]
+        d = C[3, 0]
+
+        P11b1 = eigvec_pb1[0, 0]
+        P12b1 = eigvec_pb1[0, 1]
+        P13b1 = eigvec_pb1[0, 2]
+        P14b1 = eigvec_pb1[0, 3]
+        P21b1 = eigvec_pb1[1, 0]
+        P22b1 = eigvec_pb1[1, 1]
+        P23b1 = eigvec_pb1[1, 2]
+        P24b1 = eigvec_pb1[1, 3]
+
+        P = np.array(
+            [
+                [a * P11b1, b * P12b1, c * P13b1, d * P14b1],
+                [a * P21b1, b * P22b1, c * P23b1, d * P24b1],
+            ]
+        )
+
+        kk = np.abs(np.abs(Pn) - np.abs(P))
+        j = np.sum(jj + kk)
+
+        eb1 = np.array(
+            [
+                np.exp(lmd1 * t),
+                np.exp(lmd2 * t),
+                np.exp(lmd3 * t),
+                np.exp(lmd4 * t),
+            ]
+        )
+
+        x = np.dot(P, eb1).T
+
     return t, yh, yt, x
 
 
