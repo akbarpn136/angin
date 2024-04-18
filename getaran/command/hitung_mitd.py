@@ -260,7 +260,17 @@ def _itd(df, fd, idxl, idxh, idxt):
 
         x = np.dot(P, eb1).T
 
-    return t, yh, yt, x
+    lmd_s = np.diag(np.array([lmd1, lmd2, lmd3, lmd4]))
+    P_L = np.dot(P, lmd_s)
+    V = np.vstack((P, P_L))
+
+    Gn = np.dot(V, lmd_s)
+    G = np.real(np.dot(Gn, pinv(V)))
+
+    K_eff = -G[2:, :2]
+    C_eff = -G[2:, 2:]
+
+    return t, yh, yt, x, K_eff, C_eff
 
 
 def mitd(
@@ -300,12 +310,19 @@ def mitd(
         ).alias("torsion"),
     )
 
-    t, yh, yt, x = _itd(df=df, fd=fd, idxl=idxl, idxh=idxh, idxt=idxt)
+    t, yh, yt, x, K_eff, C_eff = _itd(df=df, fd=fd, idxl=idxl, idxh=idxh, idxt=idxt)
+
+    print("Stiffness:")
+    print(K_eff)
+
+    print()
+    print("Damping:")
+    print(C_eff)
 
     plt.figure(figsize=(9, 5))
     plt.subplot(121)
     plt.plot(t, yh, label="pengujian", color="gainsboro")
-    plt.scatter(t, np.real(x[:, 0]), marker=".", s=12, color="black", label="ITD")
+    plt.scatter(t, np.real(x[:, 0]), marker=".", s=12, color="black", label="MITD")
     plt.xlabel("time (s)")
     plt.ylabel("h [mm]")
     plt.legend()
@@ -313,7 +330,7 @@ def mitd(
 
     plt.subplot(122)
     plt.plot(t, yt, label="pengujian", color="gainsboro")
-    plt.scatter(t, np.real(x[:, 1]), marker=".", s=12, color="black", label="ITD")
+    plt.scatter(t, np.real(x[:, 1]), marker=".", s=12, color="black", label="MITD")
     plt.xlabel("time (s)")
     plt.ylabel("$\\alpha$ [rad]")
     plt.legend()
