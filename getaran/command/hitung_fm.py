@@ -37,8 +37,7 @@ def fmz(
     df = df.with_columns(
         (((o2**2 - o1**2) / 2 + (bet2**2 - bet1**2) / 2) ** 2).alias("F1"),
         (
-            4 * bet1 * bet2 * ((o2**2 + o1**2) / 2 + 2 *
-                               ((bet2 + bet1) / 2) ** 2)
+            4 * bet1 * bet2 * ((o2**2 + o1**2) / 2 + 2 * ((bet2 + bet1) / 2) ** 2)
         ).alias("F2"),
         (
             ((bet2 - bet1) / (bet2 + bet1))
@@ -46,8 +45,7 @@ def fmz(
         ).alias("F3"),
     )
 
-    df = df.with_columns(
-        ((pl.col("F1") + pl.col("F2") + pl.col("F3")) / fs).alias("F"))
+    df = df.with_columns(((pl.col("F1") + pl.col("F2") + pl.col("F3")) / fs).alias("F"))
 
     df = df.select(pl.col("q", "F"))
     qq = df.select(pl.col("q")).to_numpy().flatten()
@@ -82,8 +80,10 @@ def fmz(
     # Plotting
     plt.figure(figsize=(10, 6))
     plt.annotate(
-        r"$V_{crit} =" + f"{vcrit}$ m/s, " +
-        r"$q_{crit} =" + f"{np.round(qcrit[0], 2)}$ Pa",
+        r"$V_{crit} ="
+        + f"{vcrit}$ m/s, "
+        + r"$q_{crit} ="
+        + f"{np.round(qcrit[0], 2)}$ Pa",
         xy=(40, 10),
         xycoords="figure points",
     )
@@ -93,7 +93,7 @@ def fmz(
 
     plt.scatter(qq, ff, marker="x", color="black", label="raw")
     plt.plot(tt, yhat, color="green", linewidth=1, label="fit")
-    plt.title(f"Flutter Margin $(\\alpha = {sudut}^\circ)$")
+    plt.title(f"Flutter Margin $(\\alpha = {sudut}^\\circ)$")
     plt.xlabel(r"q $(Pa)$")
     plt.ylabel(r"$F_z$")
     plt.ylim(0, 1.1)

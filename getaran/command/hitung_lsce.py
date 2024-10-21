@@ -9,18 +9,19 @@ from getaran.helper import FrekHelper
 
 
 def lsce(
-    tl: Annotated[float, typer.Option(
-        help="Batas waktu minimum. Contoh --tl 0.6159")],
-    tr: Annotated[float, typer.Option(
-        help="Batas waktu maksimum. Contoh --tr 2.2047")],
-    fname: Annotated[str, typer.Argument(
-        help="Lokasi beserta nama file")] = "./contoh/getaran.csv",
-    t: Annotated[str, typer.Option(
-        help="Kolom waktu yang dipilih dalam file fname.")] = "t",
-    hh: Annotated[str, typer.Option(
-        help="Kolom getaran yang dipilih dalam file fname.")] = "h",
+    tl: Annotated[float, typer.Option(help="Batas waktu minimum. Contoh --tl 0.6159")],
+    tr: Annotated[float, typer.Option(help="Batas waktu maksimum. Contoh --tr 2.2047")],
+    fname: Annotated[
+        str, typer.Argument(help="Lokasi beserta nama file")
+    ] = "./contoh/getaran.csv",
+    t: Annotated[
+        str, typer.Option(help="Kolom waktu yang dipilih dalam file fname.")
+    ] = "t",
+    hh: Annotated[
+        str, typer.Option(help="Kolom getaran yang dipilih dalam file fname.")
+    ] = "h",
 ):
-    c = 1/30
+    c = 1 / 30
     Moda = 32 * 2
     hlp = FrekHelper(fname=fname, sep="\t")
     df = hlp.df
@@ -34,9 +35,7 @@ def lsce(
     )
 
     lh = x.select(pl.col("lh")).item(1, 0)
-    x = x.with_columns(
-        (pl.col(hh) / pl.col("M")).alias("h")
-    )
+    x = x.with_columns((pl.col(hh) / pl.col("M")).alias("h"))
 
     dt = x.select(pl.col("dt")).item(1, 0)
     M = x.select(pl.col("M")).item(1, 0)
@@ -96,10 +95,26 @@ def lsce(
     table.field_names = ["freqf", "dampf", "dampr"]
 
     for i in range(A.size):
-        table.add_row([
-            freqf[i],
-            dampf[i],
-            dampr[i]
-        ])
+        table.add_row([freqf[i], dampf[i], dampr[i]])
 
     print(table)
+
+
+def scanlsce(
+    fname: Annotated[
+        str, typer.Argument(help="Lokasi beserta nama file")
+    ] = "./contoh/getaran.csv",
+    tl: Annotated[
+        float, typer.Option(help="Batas waktu minimum. Contoh --tl 0.6159")
+    ] = 0.0,
+    tr: Annotated[
+        float, typer.Option(help="Batas waktu maksimum. Contoh --tr 2.2047")
+    ] = 1.0,
+):
+    hlp = FrekHelper(fname=fname, sep="\t")
+    df = hlp.df
+    n = df.shape[0]
+
+    freqf, dampf, dampr = hlp.calc_lsce(tl, tr)
+
+    print(freqf, dampf, dampr)
