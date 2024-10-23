@@ -1,8 +1,8 @@
-import typer
 import numpy as np
 import polars as pl
-from scipy.linalg import hankel
+import typer
 from prettytable import PrettyTable
+from scipy.linalg import hankel
 from typing_extensions import Annotated
 
 from getaran.helper import FrekHelper
@@ -104,17 +104,24 @@ def scanlsce(
     fname: Annotated[
         str, typer.Argument(help="Lokasi beserta nama file")
     ] = "./contoh/getaran.csv",
-    tl: Annotated[
-        float, typer.Option(help="Batas waktu minimum. Contoh --tl 0.6159")
-    ] = 0.0,
-    tr: Annotated[
-        float, typer.Option(help="Batas waktu maksimum. Contoh --tr 2.2047")
+    rentang: Annotated[
+        float,
+        typer.Option(
+            help="Rentang waktu yang dipilih (dalam detik). Contoh --rentang 1.4"
+        ),
     ] = 1.0,
 ):
+    from mpire import WorkerPool
+
     hlp = FrekHelper(fname=fname, sep="\t")
     df = hlp.df
-    n = df.shape[0]
+    tt = df["t"].to_numpy()[:5]
+    ttn = tt + rentang
 
-    freqf, dampf, dampr = hlp.calc_lsce(tl, tr)
+    # with WorkerPool(n_jobs=5) as pool:
+    #     results = pool.map(hlp.calc_lsce, zip(tt, ttn), progress_bar=True)
 
-    print(freqf, dampf, dampr)
+    #     print(results[0])
+
+    # for t in tt:
+    #     f_h, dampf_h, dampr_h = hlp.calc_lsce(t, t + rentang, y="heaving")

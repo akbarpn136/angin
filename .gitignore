@@ -1,6 +1,17 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Custom
 *.xlsx
 env.yml
-__pycache__
 .vscode
 contoh/*
 !contoh/data.csv

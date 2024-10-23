@@ -1,4 +1,5 @@
 import glob
+
 import numpy as np
 import polars as pl
 from scipy.linalg import hankel
@@ -16,9 +17,7 @@ class FrekHelper:
             truncate_ragged_lines=True,
         )
         self.df.columns = ["t", "depan", "belakang"]
-        self.df = self.df.select(
-            pl.all().str.replace(",", ".").cast(pl.Float32)
-        ).drop_nulls()
+        self.df = self.df.drop_nulls()
 
         # B merupakan jarak antar sensor akselerometer
         # Satuan B dalam meter, jadi perlu dikonversi ke mm

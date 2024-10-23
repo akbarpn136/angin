@@ -1,26 +1,19 @@
-[tool.poetry]
-name = "angin"
+[project]
+name = "cobauv"
 version = "0.1.0"
-description = "Olah data angin BMKG"
-authors = ["akbarpn136 <akbarpn136@gmail.com>"]
-license = "MIT"
+description = "Add your description here"
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.10"
-polars = "^0.19.19"
-xlsxwriter = "^3.1.9"
-pandas = "^2.1.4"
-numpy = "^1.26.2"
-scipy = "^1.11.4"
-prettytable = "^3.9.0"
-typer = { extras = ["all"], version = "^0.9.0" }
-matplotlib = "^3.8.2"
-scienceplots = "^2.1.1"
-
-[tool.poetry.scripts]
-jembatan = "angin.main:app"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires-python = ">=3.12"
+dependencies = [
+    "matplotlib>=3.9.2",
+    "mpire>=2.10.2",
+    "numpy>=2.1.2",
+    "pandas>=2.2.3",
+    "polars>=1.10.0",
+    "prettytable>=3.11.0",
+    "scienceplots>=2.1.1",
+    "scipy>=1.14.1",
+    "tqdm>=4.66.5",
+    "typer>=0.12.5",
+    "xlsxwriter>=3.2.0",
+]
