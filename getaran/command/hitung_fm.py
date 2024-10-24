@@ -1,5 +1,6 @@
 import numpy as np
 import polars as pl
+
 from matplotlib import pyplot as plt
 from numpy.polynomial import polynomial as poly
 from typer import Argument, Option
@@ -15,6 +16,10 @@ def fmz(
         bool, Option(help="Tampilkan data plot index saja?.")
     ] = False,
 ):
+    import scienceplots
+
+    plt.style.use(["science", "high-vis"])
+
     rho = 1.2
     df = pl.read_csv(fname)
     df = df.filter(pl.col("sudut") == sudut)
@@ -92,8 +97,8 @@ def fmz(
     plt.scatter(qq, ff, marker="x", color="black", label="raw")
     plt.plot(tt, yhat, color="green", linewidth=1, label="fit")
     plt.title(f"Flutter Margin $(\\alpha = {sudut}^\\circ)$")
-    plt.xlabel(r"q $(Pa)$")
-    plt.ylabel(r"$F_z$")
+    plt.xlabel(r"q $(Pa)$", fontsize=12)
+    plt.ylabel(r"$F_z$", fontsize=12)
     plt.ylim(0, 1.1)
     plt.grid(True)
     plt.legend()
