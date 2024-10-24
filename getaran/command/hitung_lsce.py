@@ -142,8 +142,12 @@ def scanlsce(
         except Exception as _:
             continue
 
-    frames = pl.concat(koleksi)
-    frames = frames.with_columns(pl.lit(sudut).alias("sudut"), pl.lit(v).alias("v"))
-    frames = frames.select(pl.col("sudut", "v", "f1", "f2", "dampf1", "dampf2"))
+    try:
+        frames = pl.concat(koleksi)
+        frames = frames.with_columns(pl.lit(sudut).alias("sudut"), pl.lit(v).alias("v"))
+        frames = frames.select(pl.col("sudut", "v", "f1", "f2", "dampf1", "dampf2"))
 
-    frames.write_csv(f"FM_{sudut}_{v}.csv")
+        frames.write_csv(f"FM_{sudut}_{v}.csv")
+
+    except Exception as _:
+        print("Tidak menemukan hasil.")
