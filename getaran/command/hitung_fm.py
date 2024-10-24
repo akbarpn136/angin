@@ -1,15 +1,13 @@
 import numpy as np
 import polars as pl
-from typer import Option, Argument
 from matplotlib import pyplot as plt
-from typing_extensions import Annotated
 from numpy.polynomial import polynomial as poly
+from typer import Argument, Option
+from typing_extensions import Annotated
 
 
 def fmz(
-    fname: Annotated[
-        str, Argument(help="File flutter margin.")
-    ] = "./contoh/sukamahi.csv",
+    fname: Annotated[str, Argument(help="File flutter margin.")] = "./contoh/fm.csv",
     sudut: Annotated[
         int, Option(help="Tampilkan data waterfall untuk sudut tertentu.")
     ] = 0,
