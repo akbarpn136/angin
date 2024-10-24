@@ -105,23 +105,45 @@ def scanlsce(
         str, typer.Argument(help="Lokasi beserta nama file")
     ] = "./contoh/getaran.csv",
     rentang: Annotated[
+        int,
+        typer.Option(help="Rentang baris data yang digunakan. Contoh --rentang 100"),
+    ] = 100,
+    sudut: Annotated[
         float,
-        typer.Option(
-            help="Rentang waktu yang dipilih (dalam detik). Contoh --rentang 1.4"
-        ),
-    ] = 1.0,
+        typer.Option(help="Sudut serang dek jembatan. Contoh --sudut 0.0"),
+    ] = 0.0,
 ):
-    from mpire import WorkerPool
-
     hlp = FrekHelper(fname=fname, sep="\t")
     df = hlp.df
-    tt = df["t"].to_numpy()[:5]
-    ttn = tt + rentang
 
-    # with WorkerPool(n_jobs=5) as pool:
-    #     results = pool.map(hlp.calc_lsce, zip(tt, ttn), progress_bar=True)
+    v = fname.split("/")[-1].replace("v_", "").replace(".txt", "")
+    koleksi = []
+    for frame in df.iter_slices(n_rows=rentang):
+        tl = frame.item(0, 0)
+        tr = frame.item(-1, 0)
 
-    #     print(results[0])
+        try:
+            f_h, dampf_h, dampr_h = hlp.calc_lsce(tl, tr, "heaving")
+            f_t, dampf_t, dampr_t = hlp.calc_lsce(tl, tr, "torsion")
 
-    # for t in tt:
-    #     f_h, dampf_h, dampr_h = hlp.calc_lsce(t, t + rentang, y="heaving")
+            obj = dict(
+                f1=f_h,
+                f2=f_t,
+                dampf1=dampf_h,
+                dampr1=dampr_h,
+                dampf2=dampf_t,
+                dampr2=dampr_t,
+            )
+
+            ddf = pl.DataFrame(obj)
+
+            koleksi.append(ddf)
+
+        except Exception as _:
+            continue
+
+    frames = pl.concat(koleksi)
+    frames = frames.with_columns(pl.lit(sudut).alias("sudut"), pl.lit(v).alias("v"))
+    frames = frames.select(pl.col("sudut", "v", "f1", "f2", "dampf1", "dampf2"))
+
+    frames.write_csv(f"FM_{sudut}_{v}.csv")
