@@ -151,14 +151,18 @@ def plotabl(
 
     data = df.to_numpy()
 
+    v_std = df.select(pl.all().std()).to_numpy().flatten()
     v_rata = df.select(pl.all().mean())
     v_rata = v_rata.transpose()
     v_rata.columns = ["v_h"]
-    v_rata = v_rata.with_columns(pl.Series(name="h", values=pos))
+    v_rata = v_rata.with_columns(
+        pl.Series(name="v_std", values=v_std), pl.Series(name="h", values=pos)
+    )
     v_rata = v_rata.with_columns((v * (pl.col("h") / href) ** alpha).alias("v_teori"))
     v_rata = v_rata.with_columns(
         (pl.col("v_teori") + pl.col("v_teori") * tol).alias("v_teori_plus"),
         (pl.col("v_teori") - pl.col("v_teori") * tol).alias("v_teori_minus"),
+        (pl.col("v_std") / pl.col("v_h")).alias("turbint"),
     )
 
     fig, axs = plt.subplots(nrows=1, ncols=1, figsize=(6, 9))
@@ -225,6 +229,24 @@ def plotabl(
 
     fig1.tight_layout()
 
+    fig2, axs2 = plt.subplots(nrows=1, ncols=1, figsize=(6, 9))
+
+    axs2.grid()
+    axs2.set_title(r"Grafik Turbulen Intensitas (V = " + str(v) + " m/s)")
+    axs2.set_xlabel(r"I", fontsize=fs)
+    axs2.set_ylabel(r"Ketinggian (cm)", fontsize=fs)
+
+    axs2.scatter(
+        v_rata["turbint"].to_numpy(),
+        v_rata["h"].to_numpy(),
+        30,
+        marker="x",
+        label="Rata-rata",
+    )
+
+    fig2.tight_layout()
+
     fig.savefig(f"dist_{int(v)}.png", bbox_inches="tight", dpi=300)
     fig1.savefig(f"abl_{int(v)}.png", bbox_inches="tight", dpi=300)
+    fig2.savefig(f"turb_{int(v)}.png", bbox_inches="tight", dpi=300)
     plt.show()
