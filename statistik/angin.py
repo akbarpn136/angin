@@ -191,7 +191,7 @@ def plotabl(
     fig1, axs1 = plt.subplots(nrows=1, ncols=1, figsize=(6, 9))
 
     axs1.grid()
-    axs1.set_title(r"Grafik ABL (V=" + str(v) + "m/s)")
+    axs1.set_title(r"Grafik ABL (V = " + str(v) + " m/s)")
     axs1.set_xlabel(r"Kecepatan rata-rata (m/s)", fontsize=fs)
     axs1.set_ylabel(r"Ketinggian (cm)", fontsize=fs)
 
