@@ -224,4 +224,7 @@ def plotabl(
     axs1.legend()
 
     fig1.tight_layout()
+
+    fig.savefig(f"dist_{int(v)}.png", bbox_inches="tight", dpi=300)
+    fig1.savefig(f"abl_{int(v)}.png", bbox_inches="tight", dpi=300)
     plt.show()
