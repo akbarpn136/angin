@@ -47,11 +47,11 @@ def maxavg(
 @app.command(help="Plot Atmospheric Boundary Layer (ABL).")
 def plotabl(
     fname: Annotated[str, typer.Argument(help="Lokasi beserta nama file")],
-    alpha: Annotated[float, typer.Option(help="Konstanta profil lingkungan")] = 0.14,
+    alpha: Annotated[float, typer.Option(help="Konstanta profil lingkungan")] = 0.105,
     tol: Annotated[float, typer.Option(help="Nilai toleransi (dalam decimal)")] = 0.1,
     href: Annotated[
         float, typer.Option(help="Tinggi referensi pitot tube (satuan dalam cm)")
-    ] = 200,
+    ] = 170,
 ):
     import numpy as np
 
@@ -164,7 +164,7 @@ def plotabl(
     fig, axs = plt.subplots(nrows=1, ncols=1, figsize=(6, 9))
 
     axs.grid()
-    axs.set_title(r"Distribusi Kecepatan")
+    axs.set_title(r"Distribusi Kecepatan (V = " + str(v) + r" m/s)")
     axs.set_xlabel(r"Kecepatan (m/s)", fontsize=fs)
     axs.set_ylabel(r"Ketinggian (cm)", fontsize=fs)
     plot = axs.violinplot(
@@ -191,7 +191,7 @@ def plotabl(
     fig1, axs1 = plt.subplots(nrows=1, ncols=1, figsize=(6, 9))
 
     axs1.grid()
-    axs1.set_title(r"Grafik ABL")
+    axs1.set_title(r"Grafik ABL (V=" + str(v) + "m/s)")
     axs1.set_xlabel(r"Kecepatan rata-rata (m/s)", fontsize=fs)
     axs1.set_ylabel(r"Ketinggian (cm)", fontsize=fs)
 
