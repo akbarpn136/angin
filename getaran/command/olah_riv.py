@@ -1,7 +1,7 @@
 import numpy as np
 import polars as pl
-from typer import Option, Argument
 from matplotlib import pyplot as plt
+from typer import Argument, Option
 from typing_extensions import Annotated
 
 from getaran.helper import CollectionHelper
@@ -116,7 +116,7 @@ def displacement(
     ax2.set(
         title=f"Simpangan {'Aktual' if aktual else 'Model'} Dek (Sudut ${sudut}^\\circ$)",
         xlabel="Kecepatan (m/s)",
-        ylabel=r"$\theta$ ($^\\circ$)",
+        ylabel=r"$\theta (^{\circ}$)",
     )
 
     plt.tight_layout()
