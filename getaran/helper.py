@@ -123,15 +123,22 @@ class CollectionHelper:
                 new_columns=["f", "depan", "belakang"],
             )
 
-            q = q.select(pl.all().str.replace(",", "."))
             q = q.with_columns(pl.lit(kec).alias("v"))
             q = q.select(pl.all().cast(pl.Float32))
             q = q.filter((pl.col("f") >= frekmin) & (pl.col("f") <= frekmaks))
 
             if self.displacement:
+                varb = (pl.col("depan") - pl.col("belakang")).abs() / (
+                    self.bentang * 1000
+                )
+
                 q = q.with_columns(
                     ((pl.col("depan") + pl.col("belakang")) / 2).alias("heaving"),
-                    ((pl.col("depan") - pl.col("belakang")) / 2).abs().alias("torsion"),
+                    (
+                        pl.when(pl.col("depan") > pl.col("belakang"))
+                        .then(-np.arcsin(varb))
+                        .otherwise(np.arcsin(varb))
+                    ).alias("torsion"),
                 )
 
                 q = q.with_columns(
