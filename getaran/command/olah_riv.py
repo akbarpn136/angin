@@ -3,6 +3,9 @@ import polars as pl
 from matplotlib import pyplot as plt
 from typer import Argument, Option
 from typing_extensions import Annotated
+import scienceplots
+
+plt.style.use("science")
 
 from getaran.helper import CollectionHelper
 
